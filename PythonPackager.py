@@ -118,7 +118,7 @@ def makePkgInfo(dmg_path, info):
 	pkginfo = plistlib.readPlist(tool_dir + '/template')
 	# Set values from pkginfo template
 	pkginfo['_metadata']['created_by'] = NSUserName()
-	pkginfo['_metadata']['creation_date'] = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+	pkginfo['_metadata']['creation_date'] = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ") # Fails on NSDate- need to figure out why
 	pkginfo['_metadata']['os_version'] = subprocess.check_output(['sw_vers', '-productVersion']).rstrip('\n')
 	pkginfo['description'] = description
 	pkginfo['installcheck_script'] = installcheck_script.encode('ascii', 'xmlcharrefreplace')
@@ -139,13 +139,13 @@ def makePkgInfo(dmg_path, info):
 def importModule():
 	pass
 
-
+# Need to implement argparse so that this can be changed from command line
 module_dir = getModule("mac_alias")
 if hasPkgInfo(module_dir):
 	extracted_info = getPkgInfo(module_dir)
 else: 
 	print "Could not find PKG-INFO for specified module"
-print extracted_info
+print extracted_info # For testing purposes
 dmg = makeDMG(module_dir)
 makePkgInfo(dmg, extracted_info)
 
