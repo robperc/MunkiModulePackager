@@ -13,7 +13,6 @@ from Foundation import NSDate, NSUserName
 
 # Searchs PyPi for modules corresponding to term provided, downloads, unzips, and untars them. 
 # Returns path to unzipped, untarred module
-# URL: https://pypi.python.org/packages/source/MODULE[0]/MODULE/MODULE-x.x.x.tar.gz#md5=SOME_HASH_STRING
 
 def getModule(module):
 	# Tries to open module URL for reading. If module spelled wrong or doesn't exist on PyPi raises exception.
