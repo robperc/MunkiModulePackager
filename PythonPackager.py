@@ -62,6 +62,18 @@ def getPkgInfo(module_dir):
 	pkginfo = {line.split(':')[0]: line.split(':')[1].strip(' ') for line in lines if line.split(':')[0] in keys}
 	return pkginfo
 
+# Need to implement!!!
+# Checks to see if init.py for the module contains a version attribute.
+# Returns True if version attr exists, False otherwise.
+def checkVersionAttribute(module_dir):
+	pass
+
+# Need to implement!!!
+# Writes version attribute to init.py of specified module
+# Returns nothing
+def writeVersionAttribute(module_dir, version):
+	pass
+
 # Creates DMG containing python module. Returns path to DMG
 def makeDMG(module_dir):
 	# Get portion of module path that specifies name and version
@@ -95,7 +107,7 @@ def makePkgInfo(dmg_path, info):
 	# Path to plist file pkginfo keys are written to
 	pkginfo_path = os.getcwd() + "/" + dmg_name + ".pkginfo"
 	# Path to setup.py within module tmp directory
-	setup_path = tmp_path + "/" + dmg_name + "/setup.py"
+	setup_path = tmp_path + "/" + dmg_name
 	# Prep installcheck script for pkginfo
 	installcheck_script = """#!/usr/bin/python
 try:
@@ -112,8 +124,9 @@ logdir="LOGDIR"
 if [ ! -d "$logdir" ]; then
 	mkdir -p "$logdir"
 fi
-python SETUP_FILE install --record "$logdir/installs.txt"
-exit $?""".replace("LOGDIR", log_dir).replace("SETUP_FILE", setup_path)
+cd SETUP_DIR
+python setup.py install --record "$logdir/installs.txt"
+exit $?""".replace("LOGDIR", log_dir).replace("SETUP_DIR", setup_path)
 
 	# Prep uninstall script for pkginfo
 	uninstall_script = """#!/bin/bash
@@ -141,8 +154,8 @@ exit $?""".replace("LOGDIR", log_dir)
 	plistlib.writePlist(pkginfo, pkginfo_path)
 	return pkginfo_path
 
-# Imports pkginfo and DMG into munki repository
 # DO NOT IMPLEMENT YET. POSSIBLY MOVE TO AUTOPKG
+# Imports pkginfo and DMG into munki repository
 def importModule():
 	pass
 
