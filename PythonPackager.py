@@ -87,14 +87,15 @@ def makePkgInfo(dmg_path, info):
 	# Filename of dmg with file extension removed
 	dmg_name = dmg.split('.dmg')[0]
 	# Path to temp location of install files
-	tmp_path = "/tmp/" + dmg_name
+	tmp_path = "/tmp"
 	# Path to directory for install log needed for uninstallation
 	log_dir = "/Library/Application Support/Managed Python/" + dmg_name
 	# Get path to directory holding files for this tool
 	tool_dir = '/'.join(inspect.stack()[0][1].split('/')[0:-1])
 	# Path to plist file pkginfo keys are written to
 	pkginfo_path = os.getcwd() + "/" + dmg_name + ".pkginfo"
-
+	# Path to setup.py within module tmp directory
+	setup_path = tmp_path + "/" + dmg_name + "/setup.py"
 	# Prep installcheck script for pkginfo
 	installcheck_script = """#!/usr/bin/python
 try:
@@ -112,7 +113,7 @@ if [ ! -d "$logdir" ]; then
 	mkdir -p "$logdir"
 fi
 python SETUP_FILE install --record "$logdir/installs.txt"
-exit $?""".replace("LOGDIR", log_dir)
+exit $?""".replace("LOGDIR", log_dir).replace("SETUP_FILE", setup_path)
 
 	# Prep uninstall script for pkginfo
 	uninstall_script = """#!/bin/bash
@@ -145,9 +146,8 @@ exit $?""".replace("LOGDIR", log_dir)
 def importModule():
 	pass
 
-
-module_dir = getModule("mac_alias")
-print module_dir
+####### Need to move this code to a main function ######
+module_dir = getModule("mac_alias") # Need to add argparse functionality so that this can be specified in CLI
 if hasPkgInfo(module_dir):
 	extracted_info = getPkgInfo(module_dir)
 else: 
