@@ -13,6 +13,7 @@ from Foundation import NSDate, NSUserName
 
 # Searchs PyPi for modules corresponding to term provided, downloads, unzips, and untars them. 
 # Returns path to unzipped, untarred module
+# URL: https://pypi.python.org/packages/source/MODULE[0]/MODULE/MODULE-x.x.x.tar.gz#md5=SOME_HASH_STRING
 
 def getModule(module):
 	# Tries to open module URL for reading. If module spelled wrong or doesn't exist on PyPi raises exception.
@@ -32,13 +33,15 @@ def getModule(module):
 	if not os.path.exists(module):
 		os.makedirs(module)
 	# Creates path to file where zip will be downloaded
-	module_zip = module + "/" + module_url.split('/')[-1].split('#')[0]
+	zip_file = module_url.split('/')[-1].split('#')[0]
+	zip_path = module + "/" + zip_file
+	module_name = zip_file.split('.tar.gz')[0]
 	# Downloads zip
-	urllib.urlretrieve(module_url, module_zip)
+	urllib.urlretrieve(module_url, zip_path)
 	# Preps module tar.gz file to be extracted
-	tfile = tarfile.open(module_zip, 'r:gz')
+	tfile = tarfile.open(zip_path, 'r:gz')
 	# Extracts contents of module tar.gz to directory for module
-	tfile.extractall(module + "/")
+	tfile.extractall(module + "/" + module_name + "/")
 	# Gets the modules root directory from the recently extracted contents
 	module_dir = min(glob.iglob(module + "/*"), key=os.path.getctime)
 	tfile.close()
@@ -52,7 +55,7 @@ def hasPkgInfo(pkginfo_path):
 def getPkgInfo(module_dir):
 	# Specify which pkginfo get key / value pairs for from the PKG-INFO file
 	keys = ['Name', 'Version', 'Summary', 'Author']
-	module_pkginfo = module_dir + '/PKG-INFO'
+	module_pkginfo = module_dir + '/' + module_dir.split('/')[-1] + '/PKG-INFO'
 	# Extract the lines from the PKG-INFO into a list
 	lines = [line.rstrip('\n') for line in open(module_pkginfo)]
 	# Get the specified key / value pairs from the list of lines in dictionary form
@@ -94,30 +97,34 @@ def makePkgInfo(dmg_path, info):
 
 	# Prep installcheck script for pkginfo
 	installcheck_script = """#!/usr/bin/python
+try:
 	import sys, MODULE
-	exit_value = not MODULE.__version__.rstrip('\\n') >= 'VERS'
-	sys.exit(exit_value)""".replace("MODULE", name).replace("VERS", version)
+except ImportError:
+	print "MODULE not found, needs to be installed"
+	sys.exit(0)
+exit_value = MODULE.__version__.rstrip('\\n') >= 'VERS'
+sys.exit(exit_value)""".replace("MODULE", name).replace("VERS", version)
 
 	# Prep postinstall script for pkginfo
 	postinstall_script = """#!/bin/bash
-	logdir="LOGDIR"
-	if [ ! -d "$logdir" ]; then
-		mkdir -p "$logdir"
-	fi
-	python SETUP_FILE install --record "$logdir/installs.txt"
-	exit $?""".replace("LOGDIR", log_dir)
+logdir="LOGDIR"
+if [ ! -d "$logdir" ]; then
+	mkdir -p "$logdir"
+fi
+python SETUP_FILE install --record "$logdir/installs.txt"
+exit $?""".replace("LOGDIR", log_dir)
 
 	# Prep uninstall script for pkginfo
 	uninstall_script = """#!/bin/bash
-	logdir="LOGDIR"
-	xargs rm -v < "$logdir/installs.txt"
-	exit $?""".replace("LOGDIR", log_dir)
+logdir="LOGDIR"
+xargs rm -v < "$logdir/installs.txt"
+exit $?""".replace("LOGDIR", log_dir)
 
 	# Parse pkginfo template into dictionary
 	pkginfo = plistlib.readPlist(tool_dir + '/template')
 	# Set values from pkginfo template
 	pkginfo['_metadata']['created_by'] = NSUserName()
-	pkginfo['_metadata']['creation_date'] = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ") # Fails on NSDate- need to figure out why
+	pkginfo['_metadata']['creation_date'] = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
 	pkginfo['_metadata']['os_version'] = subprocess.check_output(['sw_vers', '-productVersion']).rstrip('\n')
 	pkginfo['description'] = description
 	pkginfo['installcheck_script'] = installcheck_script.encode('ascii', 'xmlcharrefreplace')
@@ -125,7 +132,7 @@ def makePkgInfo(dmg_path, info):
 	pkginfo['installer_item_location'] = dmg
 	pkginfo['installer_item_size'] = int(os.path.getsize(dmg_path) / 1024)
 	pkginfo['items_to_copy'][0]['destination_path'] = tmp_path
-	pkginfo['items_to_copy'][0]['source_item'] = "/"
+	pkginfo['items_to_copy'][0]['source_item'] = dmg_name
 	pkginfo['name'] = name
 	pkginfo['postinstall_script'] = postinstall_script.encode('ascii', 'xmlcharrefreplace')
 	pkginfo['uninstall_script'] = uninstall_script.encode('ascii', 'xmlcharrefreplace')
@@ -138,13 +145,14 @@ def makePkgInfo(dmg_path, info):
 def importModule():
 	pass
 
-# Need to implement argparse so that this can be changed from command line
+
 module_dir = getModule("mac_alias")
+print module_dir
 if hasPkgInfo(module_dir):
 	extracted_info = getPkgInfo(module_dir)
 else: 
 	print "Could not find PKG-INFO for specified module"
-print extracted_info # For testing purposes
+	exit(1)
+print extracted_info
 dmg = makeDMG(module_dir)
 makePkgInfo(dmg, extracted_info)
-
