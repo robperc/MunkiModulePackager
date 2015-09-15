@@ -62,18 +62,6 @@ def getPkgInfo(module_dir):
 	pkginfo = {line.split(':')[0]: line.split(':')[1].strip(' ') for line in lines if line.split(':')[0] in keys}
 	return pkginfo
 
-# Need to implement!!!
-# Checks to see if init.py for the module contains a version attribute.
-# Returns True if version attr exists, False otherwise.
-def checkVersionAttribute(module_dir):
-	pass
-
-# Need to implement!!!
-# Writes version attribute to init.py of specified module
-# Returns nothing
-def writeVersionAttribute(module_dir, version):
-	pass
-
 # Creates DMG containing python module. Returns path to DMG
 def makeDMG(module_dir):
 	# Get portion of module path that specifies name and version
@@ -115,7 +103,14 @@ try:
 except ImportError:
 	print "MODULE not found, needs to be installed"
 	sys.exit(0)
-exit_value = MODULE.__version__.rstrip('\\n') >= 'VERS'
+path = MODULE.__path__[0]
+version = path.split('site-packages/')[1].split('-')[1]
+exit_value = version >= 'VERS'
+print "Found MODULE with version %s" % (version)
+if exit_value == 0:
+	print "Installing version VERS"
+else:
+	print "Installed version up-to-date"
 sys.exit(exit_value)""".replace("MODULE", name).replace("VERS", version)
 
 	# Prep postinstall script for pkginfo
