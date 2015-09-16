@@ -23,11 +23,16 @@ def getModule(module):
 	module_regex = r'/pypi/' + module + '/(\d+\.)+(\d+)'
 	source_regex = r'https://pypi.python.org/packages/source/.+tar\.gz#md5=[^"]+'
 	# If page is an "Index of Packages" page then find the url for the page for the most recent version
-	if getMatch(pypi_path, index_regex):
+	isIndex = getMatch(pypi_path, index_regex)
+	if isIndex:
 		new_path = getMatch(pypi_path, module_regex)
 		pypi_path = pypi_url + new_path
 	# Get url to the tarred, zipped source file
 	source_url = getMatch(pypi_path, source_regex)
+	# If source url cannot be found skip the module
+	if not source_url:
+		print "%s not found on PyPi. Ensure the module name is spelled correctly." % module
+		return None
 	if not os.path.exists(module):
 		os.makedirs(module)
 	# Creates path to file where zip will be downloaded
@@ -51,8 +56,8 @@ def getMatch(url, regex):
 	# Tries to open URL for reading. If url doesn't exist raises exception.
 	try:
 		f = urllib2.urlopen(url)
-	except BaseException as e:
-		print "%s" % (e)
+	except:
+		return ""
 	# If url open successful reads contents of html into string html
 	html = f.read()
 	pattern = re.compile(regex)
@@ -177,6 +182,9 @@ def main():
 	modules = args.module
 	for module in modules:
 		module_dir = getModule(module)
+		if module_dir is None:
+			print "Skipping %s" % (module)
+			continue
 		if hasPkgInfo(module_dir):
 			extracted_info = getPkgInfo(module_dir)
 		else: 
