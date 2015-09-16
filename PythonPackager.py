@@ -127,6 +127,7 @@ exit $?""".replace("LOGDIR", log_dir).replace("SETUP_DIR", setup_path)
 	uninstall_script = """#!/bin/bash
 logdir="LOGDIR"
 xargs rm -v < "$logdir/installs.txt"
+rm "$logdir/installs.txt"
 exit $?""".replace("LOGDIR", log_dir)
 
 	# Parse pkginfo template into dictionary
@@ -154,13 +155,16 @@ exit $?""".replace("LOGDIR", log_dir)
 def importModule():
 	pass
 
-####### Need to move this code to a main function ######
-module_dir = getModule("mac_alias") # Need to add argparse functionality so that this can be specified in CLI
-if hasPkgInfo(module_dir):
-	extracted_info = getPkgInfo(module_dir)
-else: 
-	print "Could not find PKG-INFO for specified module"
-	exit(1)
-print extracted_info
-dmg = makeDMG(module_dir)
-makePkgInfo(dmg, extracted_info)
+def main():
+	module_dir = getModule("mac_alias") # Need to add argparse functionality so that this can be specified in CLI
+	if hasPkgInfo(module_dir):
+		extracted_info = getPkgInfo(module_dir)
+	else: 
+		print "Could not find PKG-INFO for specified module"
+		exit(1)
+	print extracted_info # Used for debugging
+	dmg = makeDMG(module_dir)
+	makePkgInfo(dmg, extracted_info)
+
+if __name__ == "__main__":
+    main()
