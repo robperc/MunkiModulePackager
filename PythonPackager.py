@@ -2,7 +2,6 @@ import argparse
 import datetime
 import glob
 import hashlib
-import inspect
 import os
 import plistlib
 import re
@@ -111,7 +110,7 @@ def makePkgInfo(dmg_path, info):
 	# Path to directory for install log needed for uninstallation
 	log_dir = "/Library/Application Support/Managed Python/" + dmg_name
 	# Get path to directory holding files for this tool
-	tool_dir = '/'.join(inspect.stack()[0][1].split('/')[0:-1])
+	tool_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
 	# Path to plist file pkginfo keys are written to
 	pkginfo_path = os.getcwd() + "/" + dmg_name + ".pkginfo"
 	# Path to setup.py within module tmp directory
