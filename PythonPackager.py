@@ -17,31 +17,25 @@ from Foundation import NSDate, NSUserName
 # URL: https://pypi.python.org/packages/source/MODULE[0]/MODULE/MODULE-x.x.x.tar.gz#md5=SOME_HASH_STRING
 
 def getModule(module):
-	# Tries to open module URL for reading. If module spelled wrong or doesn't exist on PyPi raises exception.
-	try:
-		pypi_url = "https://pypi.python.org/pypi/" + module
-		f = urllib2.urlopen(pypi_url)
-	except BaseException as e:
-		print "Error while searching PyPi for %s: %s" % (module, e)
-	# If url open successful reads contents of html into string html
-	### 
-	### Need to improve this for modules that have multiple versions hosted on same page
-	###
-	html = f.read()
-	regex = r'https://pypi.python.org/packages/source/.+tar\.gz#md5=[^"]+'
-	tar_gz = re.compile(regex)
-	module_url = tar_gz.search(html).group(0)
-	if not module_url:
-		raise ProcessorError("Couldn't find %s source download on PyPi" % (module))
-	# If the directory for the module doesn't already exist create it.
+	pypi_url = "https://pypi.python.org"
+	pypi_path = pypi_url + "/pypi/" + module 
+	index_regex = r'Index of Packages'
+	module_regex = r'/pypi/' + module + '/(\d+\.)+(\d+)'
+	source_regex = r'https://pypi.python.org/packages/source/.+tar\.gz#md5=[^"]+'
+	# If page is an "Index of Packages" page then find the url for the page for the most recent version
+	if getMatch(pypi_path, index_regex):
+		new_path = getMatch(pypi_path, module_regex)
+		pypi_path = pypi_url + new_path
+	# Get url to the tarred, zipped source file
+	source_url = getMatch(pypi_path, source_regex)
 	if not os.path.exists(module):
 		os.makedirs(module)
 	# Creates path to file where zip will be downloaded
-	zip_file = module_url.split('/')[-1].split('#')[0]
+	zip_file = source_url.split('/')[-1].split('#')[0]
 	zip_path = module + "/" + zip_file
 	module_name = zip_file.split('.tar.gz')[0]
 	# Downloads zip
-	urllib.urlretrieve(module_url, zip_path)
+	urllib.urlretrieve(source_url, zip_path)
 	# Preps module tar.gz file to be extracted
 	tfile = tarfile.open(zip_path, 'r:gz')
 	# Extracts contents of module tar.gz to directory for module
@@ -50,6 +44,23 @@ def getModule(module):
 	module_dir = min(glob.iglob(module + "/*"), key=os.path.getctime)
 	tfile.close()
 	return module_dir
+
+# Searchs html at specified URL for matches to given regex pattern.
+# Returns first match if found, nothing otherwise.
+def getMatch(url, regex):
+	# Tries to open URL for reading. If url doesn't exist raises exception.
+	try:
+		f = urllib2.urlopen(url)
+	except BaseException as e:
+		print "%s" % (e)
+	# If url open successful reads contents of html into string html
+	html = f.read()
+	pattern = re.compile(regex)
+	match = pattern.search(html)
+	if match:
+		return match.group(0)
+	else:
+		return ""
 
 # Returns True if PKG-INFO exists, False otherwise
 def hasPkgInfo(pkginfo_path):
