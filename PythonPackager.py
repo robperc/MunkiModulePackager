@@ -1,3 +1,4 @@
+import argparse
 import datetime
 import glob
 import hashlib
@@ -23,6 +24,9 @@ def getModule(module):
 	except BaseException as e:
 		print "Error while searching PyPi for %s: %s" % (module, e)
 	# If url open successful reads contents of html into string html
+	### 
+	### Need to improve this for modules that have multiple versions hosted on same page
+	###
 	html = f.read()
 	regex = r'https://pypi.python.org/packages/source/.+tar\.gz#md5=[^"]+'
 	tar_gz = re.compile(regex)
@@ -156,15 +160,20 @@ def importModule():
 	pass
 
 def main():
-	module_dir = getModule("mac_alias") # Need to add argparse functionality so that this can be specified in CLI
-	if hasPkgInfo(module_dir):
-		extracted_info = getPkgInfo(module_dir)
-	else: 
-		print "Could not find PKG-INFO for specified module"
-		exit(1)
-	print extracted_info # Used for debugging
-	dmg = makeDMG(module_dir)
-	makePkgInfo(dmg, extracted_info)
+	parser = argparse.ArgumentParser(description='Command line tool to fetch PyPi module sources and package them for Munki deployement')
+	parser.add_argument('module', metavar='module', type=str, nargs='+', help='name of a PyPi module')
+	args = parser.parse_args()
+	modules = args.module
+	for module in modules:
+		module_dir = getModule(module)
+		if hasPkgInfo(module_dir):
+			extracted_info = getPkgInfo(module_dir)
+		else: 
+			print "Could not find PKG-INFO for specified module"
+			exit(1)
+		print extracted_info # Used for debugging
+		dmg = makeDMG(module_dir)
+		makePkgInfo(dmg, extracted_info)
 
 if __name__ == "__main__":
     main()
