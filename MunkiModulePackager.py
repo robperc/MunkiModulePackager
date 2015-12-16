@@ -11,7 +11,7 @@ import sys
 import subprocess
 import tarfile
 import urllib, urllib2
-from Foundation import NSDate, NSUserName
+from Foundation import NSUserName
 
 # Searchs PyPi for modules corresponding to term provided, downloads, unzips, and untars them. 
 # Returns path to unzipped, untarred module
