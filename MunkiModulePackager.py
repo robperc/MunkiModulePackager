@@ -170,6 +170,7 @@ def makePkgInfo(dmg_path, info):
 		minimum_os_version='10.4.0',
 		name=name,
 		postinstall_script=postinstall_script.replace("LOGDIR", log_dir).replace("SETUP_DIR", setup_path),
+		requires=list(['XcodeTools']),
 		unattended_install=True,
 		unattended_uninstall=True,
 		uninstall_method='uninstall_script',
