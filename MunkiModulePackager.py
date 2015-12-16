@@ -16,6 +16,37 @@ from Foundation import NSDate, NSUserName
 # Searchs PyPi for modules corresponding to term provided, downloads, unzips, and untars them. 
 # Returns path to unzipped, untarred module
 
+installcheck_script = """#!/usr/bin/python
+try:
+	import sys, MODULE
+except ImportError:
+	print "MODULE not found, needs to be installed"
+	sys.exit(0)
+path = MODULE.__path__[0]
+version = path.split('site-packages/')[1].split('-')[1]
+exit_value = version >= 'VERS'
+print "Found MODULE with version %s" % (version)
+if exit_value == 0:
+	print "Installing version VERS"
+else:
+	print "Installed version up-to-date"
+sys.exit(exit_value)""".encode('ascii', 'xmlcharrefreplace')
+
+postinstall_script = """#!/bin/bash
+logdir="LOGDIR"
+if [ ! -d "$logdir" ]; then
+	mkdir -p "$logdir"
+fi
+cd SETUP_DIR
+python setup.py install --record "$logdir/installs.txt"
+exit $?""".encode('ascii', 'xmlcharrefreplace')
+
+uninstall_script = """#!/bin/bash
+logdir="LOGDIR"
+xargs rm -v < "$logdir/installs.txt"
+rm "$logdir/installs.txt"
+exit $?""".encode('ascii', 'xmlcharrefreplace')
+
 def getModule(module):
 	pypi_url = "https://pypi.python.org"
 	pypi_path = pypi_url + "/pypi/" + module 
@@ -116,57 +147,36 @@ def makePkgInfo(dmg_path, info):
 	pkginfo_path = os.getcwd() + "/" + dmg_name + ".pkginfo"
 	# Path to setup.py within module tmp directory
 	setup_path = tmp_path + "/" + dmg_name
-	# Prep installcheck script for pkginfo
-	installcheck_script = """#!/usr/bin/python
-try:
-	import sys, MODULE
-except ImportError:
-	print "MODULE not found, needs to be installed"
-	sys.exit(0)
-path = MODULE.__path__[0]
-version = path.split('site-packages/')[1].split('-')[1]
-exit_value = version >= 'VERS'
-print "Found MODULE with version %s" % (version)
-if exit_value == 0:
-	print "Installing version VERS"
-else:
-	print "Installed version up-to-date"
-sys.exit(exit_value)""".replace("MODULE", name).replace("VERS", version)
-
-	# Prep postinstall script for pkginfo
-	postinstall_script = """#!/bin/bash
-logdir="LOGDIR"
-if [ ! -d "$logdir" ]; then
-	mkdir -p "$logdir"
-fi
-cd SETUP_DIR
-python setup.py install --record "$logdir/installs.txt"
-exit $?""".replace("LOGDIR", log_dir).replace("SETUP_DIR", setup_path)
-
-	# Prep uninstall script for pkginfo
-	uninstall_script = """#!/bin/bash
-logdir="LOGDIR"
-xargs rm -v < "$logdir/installs.txt"
-rm "$logdir/installs.txt"
-exit $?""".replace("LOGDIR", log_dir)
-
-	# Parse pkginfo template into dictionary
-	pkginfo = plistlib.readPlist(tool_dir + '/template')
-	# Set values from pkginfo template
-	pkginfo['_metadata']['created_by'] = NSUserName()
-	pkginfo['_metadata']['creation_date'] = datetime.datetime.utcnow()
-	pkginfo['_metadata']['os_version'] = subprocess.check_output(['sw_vers', '-productVersion']).rstrip('\n')
-	pkginfo['description'] = description
-	pkginfo['installcheck_script'] = installcheck_script.encode('ascii', 'xmlcharrefreplace')
-	pkginfo['installer_item_hash'] = hashlib.sha256(open(dmg_path, 'rb').read()).hexdigest()
-	pkginfo['installer_item_location'] = dmg
-	pkginfo['installer_item_size'] = int(os.path.getsize(dmg_path) / 1024)
-	pkginfo['items_to_copy'][0]['destination_path'] = tmp_path
-	pkginfo['items_to_copy'][0]['source_item'] = dmg_name
-	pkginfo['name'] = name
-	pkginfo['postinstall_script'] = postinstall_script.encode('ascii', 'xmlcharrefreplace')
-	pkginfo['uninstall_script'] = uninstall_script.encode('ascii', 'xmlcharrefreplace')
-	pkginfo['version'] = version
+	pkginfo = dict(
+		_metadata=dict(
+			created_by=NSUserName(),
+			creation_date=datetime.datetime.utcnow(),
+			os_version=subprocess.check_output(['sw_vers', '-productVersion']).rstrip('\n'),
+		),
+		autoremove=False,
+		catalogs=list(['testing']),
+		description=description,
+		installcheck_script=installcheck_script.replace("MODULE", name).replace("VERS", version),
+		installer_item_hash=hashlib.sha256(open(dmg_path, 'rb').read()).hexdigest(),
+		installer_item_location=dmg,
+		installer_item_size=int(os.path.getsize(dmg_path) / 1024),
+		installer_type='copy_from_dmg',
+		items_to_copy=list((
+			dict(
+				destination_path=tmp_path,
+				source_item=dmg_name,
+			),
+		)),
+		minimum_os_version='10.4.0',
+		name=name,
+		postinstall_script=postinstall_script.replace("LOGDIR", log_dir).replace("SETUP_DIR", setup_path),
+		unattended_install=True,
+		unattended_uninstall=True,
+		uninstall_method='uninstall_script',
+		uninstall_script=uninstall_script.replace("LOGDIR", log_dir),
+		uninstallable=True,
+		version=version,
+	)
 	plistlib.writePlist(pkginfo, pkginfo_path)
 	return pkginfo_path
 
