@@ -154,7 +154,7 @@ exit $?""".replace("LOGDIR", log_dir)
 	pkginfo = plistlib.readPlist(tool_dir + '/template')
 	# Set values from pkginfo template
 	pkginfo['_metadata']['created_by'] = NSUserName()
-	pkginfo['_metadata']['creation_date'] = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+	pkginfo['_metadata']['creation_date'] = datetime.datetime.utcnow()
 	pkginfo['_metadata']['os_version'] = subprocess.check_output(['sw_vers', '-productVersion']).rstrip('\n')
 	pkginfo['description'] = description
 	pkginfo['installcheck_script'] = installcheck_script.encode('ascii', 'xmlcharrefreplace')
