@@ -105,7 +105,7 @@ def hasPkgInfo(pkginfo_path):
 # Returns Name, Version, Summary, Author in dictionary format
 def getPkgInfo(module_dir):
 	# Specify which pkginfo get key / value pairs for from the PKG-INFO file
-	keys = ['Name', 'Version', 'Summary', 'Author']
+	keys = ('Name', 'Version', 'Summary', 'Author')
 	module_pkginfo = module_dir + '/' + module_dir.split('/')[-1] + '/PKG-INFO'
 	# Extract the lines from the PKG-INFO into a list
 	lines = [line.rstrip('\n') for line in open(module_pkginfo)]
