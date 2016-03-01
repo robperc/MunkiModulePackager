@@ -122,7 +122,7 @@ def makeDMG(module_dir):
 	# Get portion of module path that specifies name and version
 	name_vers = module_dir.split('/')[-1]
 	# Prep bash command string to create module dmg
-	mk_dmg_args = "hdiutil create -volname " + name_vers + " -srcfolder " + module_dir + " -ov -format UDZO " + name_vers + ".dmg"
+	mk_dmg_args = "hdiutil create -volname %s -srcfolder %s -ov -format UDZO %s.dmg" % (name_vers, module_dir, name_vers)
 	# Try to create DMG, print error if exception occurs
 	try:
 		subprocess.check_call(mk_dmg_args.split())
