@@ -129,7 +129,7 @@ def makeDMG(module_dir):
 	except Exception as e:
 		print "An error occured during creation of DMG for module: %s" % (e)
 	# Return path to the newly created DMG
-	return os.getcwd() + "/" + name_vers + ".dmg"
+	return "%s/%s.dmg" % (os.getcwd(), name_vers)
 
 # Creates a custom pkginfo for python module. Returns path to pkginfo
 def makePkgInfo(dmg_path, info):
