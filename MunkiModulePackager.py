@@ -1,5 +1,12 @@
 #!/usr/bin/python
 
+"""
+Searchs PyPi for modules corresponding to term provided, downloads, unzips, and untars them. 
+Returns path to unzipped, untarred module.
+
+"""
+
+
 import argparse
 import datetime
 import glob
@@ -12,9 +19,6 @@ import subprocess
 import tarfile
 import urllib, urllib2
 from Foundation import NSUserName
-
-# Searchs PyPi for modules corresponding to term provided, downloads, unzips, and untars them. 
-# Returns path to unzipped, untarred module
 
 installcheck_script = """#!/usr/bin/python
 try:
@@ -49,7 +53,7 @@ exit $?""".encode('ascii', 'xmlcharrefreplace')
 
 def getModule(module):
 	pypi_url = "https://pypi.python.org"
-	pypi_path = pypi_url + "/pypi/" + module 
+	pypi_path = "%s/pypi/%s" % (pypi_url, module)
 	index_regex = r'Index of Packages'
 	module_regex = r'/pypi/' + module + '/(\d+\.)+(\d+)'
 	source_regex = r'https://pypi.python.org/packages/source/.+tar\.gz#md5=[^"]+'
