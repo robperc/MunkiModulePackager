@@ -1,12 +1,5 @@
 #!/usr/bin/python
 
-"""
-Searchs PyPi for modules corresponding to term provided, downloads, unzips, and untars them. 
-Returns path to unzipped, untarred module.
-
-"""
-
-
 import argparse
 import datetime
 import glob
@@ -52,6 +45,17 @@ rm "$logdir/installs.txt"
 exit $?""".encode('ascii', 'xmlcharrefreplace')
 
 def getModule(module):
+	"""
+	Searchs PyPi for modules corresponding to term provided, downloads, unzips, and untars them. 
+
+    Args:
+        module (str): Name of module to search pypi repository for.
+
+    Returns:
+        Path to directory for unzipped, untarred module downloaded if found on pypi.
+        None if module not found on pypi.
+
+	"""
 	pypi_url = "https://pypi.python.org"
 	pypi_path = "%s/pypi/%s" % (pypi_url, module)
 	index_regex = r'Index of Packages'
