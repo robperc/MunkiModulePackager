@@ -89,8 +89,6 @@ def getModule(module):
 	tfile.close()
 	return module_dir
 
-# Searchs html at specified URL for matches to given regex pattern.
-# Returns first match if found, nothing otherwise.
 def getMatch(url, regex):
 	"""
 	Searchs html at specified URL for matches to given regex pattern.
