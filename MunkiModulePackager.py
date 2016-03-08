@@ -92,6 +92,18 @@ def getModule(module):
 # Searchs html at specified URL for matches to given regex pattern.
 # Returns first match if found, nothing otherwise.
 def getMatch(url, regex):
+	"""
+	Searchs html at specified URL for matches to given regex pattern.
+
+    Args:
+        url   (str): URL for webpage to search html of.
+        regex (str): Regex for pattern to find match for.
+
+    Returns:
+        First match to regex if found.
+        Empty string otherwise.
+
+	"""
 	# Tries to open URL for reading. If url doesn't exist raises exception.
 	try:
 		f = urllib2.urlopen(url)
