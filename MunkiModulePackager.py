@@ -118,6 +118,17 @@ def getMatch(url, regex):
 
 # Returns True if PKG-INFO exists, False otherwise
 def hasPkgInfo(pkginfo_path):
+	"""
+	Verifies file exists at input path.
+
+    Args:
+        pkginfo_path (str): Path to check existence of file at.
+
+    Returns:
+    	True if file exists at path.
+    	False otherwise.
+
+	"""
 	return os.path.exists(pkginfo_path)
 
 # Returns Name, Version, Summary, Author in dictionary format
