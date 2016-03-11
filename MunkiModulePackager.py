@@ -116,7 +116,6 @@ def getMatch(url, regex):
 	else:
 		return ""
 
-# Returns True if PKG-INFO exists, False otherwise
 def hasPkgInfo(pkginfo_path):
 	"""
 	Verifies file exists at input path.
