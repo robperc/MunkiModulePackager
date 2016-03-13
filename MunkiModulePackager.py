@@ -130,7 +130,6 @@ def hasPkgInfo(pkginfo_path):
 	"""
 	return os.path.exists(pkginfo_path)
 
-# Returns Name, Version, Summary, Author in dictionary format
 def getPkgInfo(module_dir):
 	"""
 	Parses module name, version, summary, author from PKG-INFO file into dictionary format
