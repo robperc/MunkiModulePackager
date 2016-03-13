@@ -132,6 +132,16 @@ def hasPkgInfo(pkginfo_path):
 
 # Returns Name, Version, Summary, Author in dictionary format
 def getPkgInfo(module_dir):
+	"""
+	Parses module name, version, summary, author from PKG-INFO file into dictionary format
+
+    Args:
+        module_dir (str): Path to directory of module.
+
+    Returns:
+    	Dictionary containing info parsed from PKG-INFO.
+
+	"""
 	# Specify which pkginfo get key / value pairs for from the PKG-INFO file
 	keys = ('Name', 'Version', 'Summary', 'Author')
 	module_pkginfo = module_dir + '/' + module_dir.split('/')[-1] + '/PKG-INFO'
