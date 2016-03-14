@@ -152,6 +152,16 @@ def getPkgInfo(module_dir):
 
 # Creates DMG containing python module. Returns path to DMG
 def makeDMG(module_dir):
+	"""
+	Creates DMG containing python module.
+
+    Args:
+        module_dir (str): Path to directory of module.
+
+    Returns:
+    	Returns path to created DMG.
+
+	"""
 	# Get portion of module path that specifies name and version
 	name_vers = module_dir.split('/')[-1]
 	# Prep bash command string to create module dmg
