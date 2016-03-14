@@ -150,7 +150,6 @@ def getPkgInfo(module_dir):
 	pkginfo = {line.split(':')[0]: line.split(':')[1].strip(' ') for line in lines if line.split(':')[0] in keys}
 	return pkginfo
 
-# Creates DMG containing python module. Returns path to DMG
 def makeDMG(module_dir):
 	"""
 	Creates DMG containing python module.
