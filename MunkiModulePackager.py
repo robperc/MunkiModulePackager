@@ -175,6 +175,17 @@ def makeDMG(module_dir):
 
 # Creates a custom pkginfo for python module. Returns path to pkginfo
 def makePkgInfo(dmg_path, info):
+	"""
+	Creates Munki pkginfo file for python module.
+
+    Args:
+        dmg_path                       (str): Path to dmg-packaged python module.
+        info (dict(str: str, ..., str: str)): Dictionary containing module info parsed from PKG-INFO file.
+
+    Returns:
+    	Returns path to created pkginfo.
+
+	"""
 	# Info from PKG-INFO
 	name = info['Name']
 	version = info['Version']
