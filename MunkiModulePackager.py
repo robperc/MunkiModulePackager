@@ -173,7 +173,6 @@ def makeDMG(module_dir):
 	# Return path to the newly created DMG
 	return "%s/%s.dmg" % (os.getcwd(), name_vers)
 
-# Creates a custom pkginfo for python module. Returns path to pkginfo
 def makePkgInfo(dmg_path, info):
 	"""
 	Creates Munki pkginfo file for python module.
